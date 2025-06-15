@@ -19,7 +19,7 @@ export const Home = () => {
     >
       <Box sx={{ width: "100%" }}>
         <Typography variant="h2" sx={{ m: 0 }} fontWeight={600} color="white">
-           ברוכים הבאים לאליאס
+          ברוכים הבאים לאליאס
         </Typography>
       </Box>
       <Box
