@@ -28,10 +28,9 @@ const generateBoard = (size: number, trapCount: number): Tile[] => {
   return tiles;
 };
 
-
 export const Board = () => {
   const size = 10;
-  const trapCount = 15;
+  const trapCount = 10;
   const tiles = useMemo(() => generateBoard(size, trapCount), []);
   const { groups } = useGroupStore();
 
@@ -39,10 +38,15 @@ export const Board = () => {
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: `repeat(${size}, 50px)`,
-        gap: 1,
+        gridTemplateColumns: {
+          xs: `repeat(${size}, 2rem)`, // full-width columns on small screens
+          sm: `repeat(${size}, 3.4rem)`,
+          md: `repeat(${size}, 3.8rem)`,
+          lg: `repeat(${size}, 4rem)`,
+        },
+        gap: { xs: "0.5rem", sm: "0.8rem" },
         justifyContent: "center",
-        mt: 4,
+        mt: "1rem",
       }}
     >
       {tiles.map((tile) => {
@@ -51,8 +55,7 @@ export const Board = () => {
           <Box
             key={tile.id}
             sx={{
-              width: 50,
-              height: 50,
+              aspectRatio: "1",
               backgroundColor: tile.isStart
                 ? "#4CAF50"
                 : tile.isTrap
@@ -66,6 +69,8 @@ export const Board = () => {
               border: "1px solid #999",
               position: "relative",
               fontWeight: "bold",
+              width:{ xs: "1.95rem", sm: "3.3rem", md: "4.2rem", lg: "6rem" },
+              fontSize: { xs: "0.8rem", sm: "1.2rem", md: "2rem" },
               color: tile.isTrap || tile.isStart ? "#fff" : "#333",
             }}
           >
@@ -75,15 +80,16 @@ export const Board = () => {
                 display: "flex",
                 position: "absolute",
                 bottom: 2,
-                gap: "2px",
+                flexWrap: "wrap",
+                justifyContent: "center",
               }}
             >
               {tilePlayers.map((player) => (
                 <Box
                   key={player.name}
                   sx={{
-                    width: 12,
-                    height: 12,
+                    width: { xs: 8, sm: 10, md: 12 },
+                    height: { xs: 8, sm: 10, md: 12 },
                     borderRadius: "50%",
                     backgroundColor: player.color,
                     border: "1px solid #fff",

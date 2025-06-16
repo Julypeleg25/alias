@@ -8,6 +8,7 @@ import { CacheProvider, ThemeProvider } from "@emotion/react";
 import { SnackbarProvider } from "notistack";
 import { Game } from "./components/pages/MainGame";
 import { Cards } from "./components/Cards";
+import EndPage from "./components/pages/End";
 
 export default function App() {
   return (
@@ -19,11 +20,11 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Layout />}>
+              <Route path="end" element={<EndPage />} />
               <Route index element={<Home />} />
               <Route path="groupArrange" element={<GroupArrange />} />
               <Route path="game" element={<Game />} />
               <Route path="cards" element={<Cards />} />
-
             </Route>
           </Routes>
         </BrowserRouter>

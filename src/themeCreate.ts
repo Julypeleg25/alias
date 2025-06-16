@@ -3,32 +3,48 @@ import rtlPlugin from "@mui/stylis-plugin-rtl";
 import createCache from "@emotion/cache";
 
 export const theme = createTheme({
-  direction: 'rtl',
-  typography: {
-    fontFamily: "'Assistant', sans-serif", // or 'Rubik', etc.
-  },
   palette: {
     primary: {
-      main: "#cd2c56", // Example primary color
-      contrastText: "#000", // Example contrast text color
+      main: "#81c784", // light green
+      contrastText: "#fff",
     },
     secondary: {
-      main: "#f2af8e", // Example secondary color 
-      contrastText: "#000", // Example contrast text color
+      main: "#ff9800", // orange
+      contrastText: "#fff",
     },
     background: {
-      default: "#f2af8e", // Example background color
-      paper: "#ededed", // Example paper color
+      default: "#f9fdf9",
+      paper: "#ffffff",
     },
     text: {
-      primary: "#000", // Example primary text color  
+      primary: "#333",
     },
-    error: {
-      main: "#d32f2f", // Example error color
-      contrastText: "#fff", // Example contrast text color for error
-  }
-}
-
+  },
+  typography: {
+    fontFamily: "'Rubik', 'Arial', sans-serif",
+    button: {
+      fontWeight: 600,
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: "2rem",
+          padding: "0.5rem 1.8rem",
+          textTransform: "none",
+          backgroundColor: "#a5d6a7", // even lighter green
+          color: "#fff",
+          transition: "all 0.3s ease",
+          boxShadow: "0 3px 6px rgba(0, 0, 0, 0.1)",
+          "&:hover": {
+            backgroundColor: "#81c784", // darker on hover
+            boxShadow: "0 5px 12px rgba(0, 0, 0, 0.2)",
+          },
+        },
+      },
+    },
+  },
 });
 
 export const cacheRtl = createCache({

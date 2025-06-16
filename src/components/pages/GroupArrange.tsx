@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Divider,
   MenuItem,
   Select,
   TextField,
@@ -24,14 +25,8 @@ const colors = [
   "white",
 ];
 
-export interface GroupDetails {
-  name: string;
-  color: string;
-  position: number;
-}
-
 export const GroupArrange = () => {
-  const { addGroup, groups, setCurrentGroupName } = useGroupStore();
+  const { addGroup, groups, setCurrentGroupId } = useGroupStore();
   const [currentGroupName, setGroupName] = useState<string>();
   const [selectedColor, setSelectedColor] = useState<string>();
   const navigate = useNavigate();
@@ -41,6 +36,15 @@ export const GroupArrange = () => {
   };
 
   const handleAddGroup = () => {
+    if (groups.length === 4) {
+      enqueueSnackbar("לא ניתן לשחק יותר מארבע קבוצות במשחק", {
+        variant: "error",
+        autoHideDuration: 1500,
+        preventDuplicate: true,
+      });
+
+      return;
+    }
     if (currentGroupName && selectedColor) {
       if (
         groups
@@ -59,10 +63,11 @@ export const GroupArrange = () => {
         name: currentGroupName,
         color: selectedColor || DEFAULT_COLOR,
         position: 0,
+        id: groups.length + 1,
       });
       setGroupName("");
       setSelectedColor("");
-      enqueueSnackbar("קבוצה פפפפ נוספה בהצלחה", {
+      enqueueSnackbar('הקבוצה נוספה בהצלחה', {
         variant: "success",
         autoHideDuration: 1500,
         preventDuplicate: true,
@@ -91,7 +96,7 @@ export const GroupArrange = () => {
       });
       return;
     }
-    setCurrentGroupName(groups[0].name);
+    setCurrentGroupId(groups[0].id);
     navigate("/game");
   };
 
@@ -99,41 +104,37 @@ export const GroupArrange = () => {
     <Box
       dir="rtl"
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
+        display: "grid",
+        justifyItems: "center",
         height: "100vh",
         width: "100vw",
-        alignItems: "center",
         backgroundColor: "#ededed",
       }}
     >
-      <h1>ארגון קבוצות</h1>
       <div
         style={{
           alignItems: "center",
-          placeItems: "start",
+          justifyContent: "center",
+          justifyItems: "center",
           display: "grid",
-          gap: "2.5rem",
-          marginTop: "-12rem",
         }}
       >
+        <h1>ארגון קבוצות</h1>
         <TextField
+          style={{ minWidth: "100%" }}
           onChange={handleGroupNameChange}
           label="הכנס שם קבוצה"
           value={currentGroupName}
         />
         <Select
+          style={{ minWidth: "100%" }}
           value={selectedColor}
           onChange={handleChange}
           displayEmpty
-          sx={{
-            width: "11.5rem",
-          }}
           renderValue={() => (
             <Box
               sx={{
-                width: "9rem",
+                width: "15rem",
                 height: "1.5rem",
                 backgroundColor: selectedColor || "#ccc",
                 border: "1px solid #999",
@@ -144,13 +145,20 @@ export const GroupArrange = () => {
           {colors
             .filter((color) => !groups.some((group) => group.color === color))
             .map((color) => (
-              <MenuItem key={color} value={color} sx={{ p: 0 }}>
+              <MenuItem
+                key={color}
+                value={color}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 <Box
                   sx={{
-                    width: "9rem",
-                    height: "1.5rem",
+                    width: "14rem",
+                    height: "1.7rem",
                     backgroundColor: color,
-                    m: "auto",
                     border: "1px solid #999",
                   }}
                 />
@@ -161,22 +169,27 @@ export const GroupArrange = () => {
           variant="contained"
           color="primary"
           onClick={handleAddGroup}
-          style={{ display: "flex", placeSelf: "center" }}
+          style={{
+            fontSize: "1.2rem",
+            display: "flex",
+            placeSelf: "center",
+            minWidth: "55%",
+          }}
         >
           הוסף קבוצה
         </Button>
       </div>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-start",
-          marginBottom: "4rem",
+
+      <Button
+        variant="contained"
+        onClick={handleSubmit}
+        style={{
+          fontSize: "1.5rem",
+          placeSelf: "center",
         }}
       >
-        <Button variant="contained" onClick={handleSubmit}>
-          סיים והמשך לתחילת המשחק
-        </Button>
-      </Box>
+        סיים והמשך לתחילת המשחק
+      </Button>
     </Box>
   );
 };
