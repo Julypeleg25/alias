@@ -14,9 +14,11 @@ import { useBoardStore } from "../state/BoardStore";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import { useGroupStore } from "../state/GroupsStore";
 import { useNavigate } from "react-router-dom";
+import { theme } from "../themeCreate";
+import words from "../alias_words.json";
 
 const base_words = [
-  "מחשב",
+  "מחשב lkhkylhjlyj kk",
   "טלפון",
   "חתול",
   "כלב",
@@ -112,28 +114,52 @@ export const Cards = () => {
   const [currentAmount, setCurrentAmount] = useState(0);
   const [currIndex, setCurrentIndex] = useState(0);
   const [clicked, setClicked] = useState(false);
+  const [skipped, setSkipped] = useState(false);
   const [endSession, setEndSession] = useState(false);
   const [open, setOpen] = useState(false);
-  const [endingGroupName, setEndingGroupName] = useState<string | undefined>(
+  const [endingGroupId, setEndingGroupId] = useState<number | undefined>(
     undefined
   );
   const { addUsedWord, usedWords } = useBoardStore();
-  const { groups, advanceGroup, currentGroupName } = useGroupStore();
+  const {
+    groups,
+    advanceGroup,
+    currentGroupId,
+    setCurrentGroupId,
+    setWiningGroup,
+  } = useGroupStore();
   const navigate = useNavigate();
+  const currentGroup = groups.find((group) => group.id === currentGroupId);
 
   const handleClickOpen = () => {
     setOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    advanceGroup(currentGroupName as string, currentAmount);
-    advanceGroup(endingGroupName as string, 1);
-    navigate("/game");
+  const handleClose = (answered?: boolean) => {
+    if (currentGroup && currentGroupId) {
+      setOpen(false);
+      if (currentGroup?.position + currentAmount >= 100) {
+        setWiningGroup(currentGroup);
+        navigate("/end");
+        return;
+      }
+      advanceGroup(currentGroupId, currentAmount);
+      const endingGroup = groups.find((group) => group.id === endingGroupId);
+      if (endingGroup && endingGroup.position + 1 >= 100) {
+        setWiningGroup(endingGroup);
+        navigate("/end");
+        return;
+      }
+      endingGroupId && answered && advanceGroup(endingGroupId, 1);
+      setCurrentGroupId(((currentGroupId ?? 1) % groups.length) + 1);
+      navigate("/game");
+    }
   };
 
   const handleClick = () => {
     addUsedWord(base_words[currIndex]);
+    words[currIndex].used = true;
+
     setCurrentAmount((prev) => prev + 1);
     setCurrentIndex((prev) => prev + 1);
     setClicked(true);
@@ -142,6 +168,21 @@ export const Cards = () => {
 
   const handleEndSession = () => {
     setEndSession(true);
+  };
+
+  const handleFinalSession = (event: { target: { value: string } }) => {
+    setEndingGroupId(
+      groups.find((group) => group.name === event.target.value)?.id
+    );
+  };
+
+  const handleSkipped = () => {
+    setCurrentIndex((prev) => prev + 1);
+    addUsedWord(base_words[currIndex]);
+    words[currIndex].used = true;
+    setCurrentAmount((prev) => prev - 1);
+    setSkipped(true);
+    setTimeout(() => setSkipped(false), 200);
   };
 
   return (
@@ -157,37 +198,36 @@ export const Cards = () => {
       <CountdownCircleTimer
         isPlaying
         onComplete={handleEndSession}
-        duration={5}
+        duration={6}
         colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
         colorsTime={[45, 30, 10, 0]}
       >
         {({ remainingTime }) => remainingTime}
       </CountdownCircleTimer>
 
-      <Typography fontSize="3rem">{currentAmount}</Typography>
+      <Typography fontSize="3rem"> {currentAmount} :סה"כ </Typography>
       <Box
         sx={{
           padding: "0.5rem",
-          backgroundColor: clicked ? "lightgreen" : "#f0f0f0",
+          backgroundColor: clicked ? "lightgreen" : skipped ? "red" : "#f0f0f0",
           border: "1px solid #ccc",
-          height: "30rem",
+          height: { xs: "30rem", sm: "35rem", md: "38rem", lg: "40rem" },
           opacity: endSession ? 0.65 : 1,
           pointerEvents: endSession ? "none" : "initial",
-          width: "20rem",
+          width: { xs: "20rem", sm: "35rem", md: "30rem", lg: "35rem" },
           justifyItems: "center",
           alignContent: "center",
           alignItems: "center",
-          fontSize: "5rem",
+          fontSize: { xs: "5rem", sm: "7rem", md: "9rem", lg: "10rem" },
           display: "grid",
           fontWeight: "bold",
           transition: "background-color 0.3s",
-          cursor: "pointer",
           flexWrap: "wrap",
+          textAlign: "center",
         }}
         onClick={handleClick}
-        //only use the word if it hasn't been used before
       >
-        {base_words[currIndex]}
+        {words[currIndex].word}
       </Box>
       <div
         style={{
@@ -197,9 +237,12 @@ export const Cards = () => {
         }}
       >
         <Button
+          sx={{
+            fontSize: { xs: "1.2rem", sm: "1.5rem", md: "2rem" },
+            width: { xs: "8rem", sm: "10rem", md: "20rem", lg: "25rem" },
+          }}
           disabled={!endSession}
           variant="contained"
-          style={{ width: "5rem" }}
           onClick={handleClickOpen}
         >
           סיים תור
@@ -207,40 +250,23 @@ export const Cards = () => {
         <Button
           disabled={endSession}
           variant="contained"
-          style={{ width: "3rem" }}
-          onClick={() => {
-            setCurrentIndex((prev) => prev + 1);
-            addUsedWord(base_words[currIndex]);
-            setCurrentAmount((prev) => prev - 1);
+          onClick={handleSkipped}
+          sx={{
+            fontSize: { xs: "1.2rem", sm: "1.5rem", md: "2rem" },
+            width: { xs: "8rem", sm: "10rem", md: "20rem", lg: "25rem" },
           }}
         >
           דלג
         </Button>
       </div>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        slotProps={{
-          paper: {
-            component: "form",
-            onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-              event.preventDefault();
-              const formData = new FormData(event.currentTarget);
-              const formJson = Object.fromEntries((formData as any).entries());
-              const email = formJson.email;
-              console.log(email);
-              handleClose();
-            },
-          },
-        }}
-      >
+      <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle>איזו קבוצה הצליחה את המילה האחרונה?</DialogTitle>
         <DialogContent>
           <Select
             fullWidth
-            value={endingGroupName}
+            value={groups.find((group) => group.id === endingGroupId)?.name}
             displayEmpty
-            onChange={(e) => setEndingGroupName(e.target.value)}
+            onChange={handleFinalSession}
           >
             {groups.map((group) => (
               <MenuItem key={group.name} value={group.name}>
@@ -249,8 +275,14 @@ export const Cards = () => {
             ))}
           </Select>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>סיים</Button>
+        <DialogActions sx={{ justifyContent: "space-between" }}>
+          <Button
+            style={{ backgroundColor: theme.palette.secondary.main }}
+            onClick={() => handleClose()}
+          >
+            דלג
+          </Button>
+          <Button onClick={() => handleClose(true)}>סיים</Button>
         </DialogActions>
       </Dialog>
     </Box>
